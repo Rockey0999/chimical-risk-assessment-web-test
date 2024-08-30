@@ -1,55 +1,95 @@
-// script.js
+// Chemical data
 const chemicalData = {
     "Caffeine": {
-        description: "Found in coffee, tea, and many energy drinks.",
-        riskLevels: {
-            qsar: 0.05,
-            experimental: 0.04,
-            custom: 0.0143
+        "ld50": 192,
+        "qsarRisk": 0.05,
+        "details": {
+            "Description": "Caffeine is a stimulant found in coffee, tea, and various other products.",
+            "Diseases": "May cause insomnia, nervousness, restlessness, stomach irritation.",
+            "Solution": "Limit intake of caffeinated beverages."
         }
     },
     "Aspartame": {
-        description: "Used as an artificial sweetener in many diet products.",
-        riskLevels: {
-            qsar: 0.01,
-            experimental: 0.005,
-            custom: 0.0179
+        "ld50": 5000,
+        "qsarRisk": 0.01,
+        "details": {
+            "Description": "Aspartame is an artificial sweetener used in many low-calorie products.",
+            "Diseases": "May cause headaches or allergic reactions in some individuals.",
+            "Solution": "Monitor intake if sensitive to aspartame."
         }
     },
-    // Add more chemical data
+    // Add more chemicals as needed...
 };
 
-function updateChemicalDetails() {
-    const select = document.getElementById("chemicalSelect");
-    const detailsDiv = document.getElementById("chemicalDetails");
-    const chemical = select.value;
-
-    if (chemical && chemicalData[chemical]) {
-        detailsDiv.querySelector("#chemicalDescription").textContent = `Description: ${chemicalData[chemical].description}`;
-        detailsDiv.querySelector("#chemicalRiskLevels").textContent = `QSAR Model Risk Level: ${chemicalData[chemical].riskLevels.qsar}, Experimental Risk Level: ${chemicalData[chemical].riskLevels.experimental}, Custom Formula Risk Level: ${chemicalData[chemical].riskLevels.custom}`;
-        renderChart(chemical);
-    } else {
-        detailsDiv.querySelector("#chemicalDescription").textContent = "";
-        detailsDiv.querySelector("#chemicalRiskLevels").textContent = "";
-    }
+// Populate the chemical dropdown
+const chemicalSelect = document.getElementById('chemical');
+for (const chemical in chemicalData) {
+    const option = document.createElement('option');
+    option.value = chemical;
+    option.textContent = chemical;
+    chemicalSelect.appendChild(option);
 }
 
-function renderChart(chemical) {
-    const ctx = document.getElementById('riskChart').getContext('2d');
-    const data = chemicalData[chemical].riskLevels;
+// Calculate risk level
+document.getElementById('calculate').addEventListener('click', () => {
+    const chemical = document.getElementById('chemical').value;
+    const age = parseFloat(document.getElementById('age').value);
+    const bodyWeight = parseFloat(document.getElementById('body-weight').value);
+    const concentration = parseFloat(document.getElementById('concentration').value);
+    const exposure = parseFloat(document.getElementById('exposure').value);
+    const ld50 = parseFloat(document.getElementById('ld50').value);
 
+    if (!chemical || isNaN(age) || isNaN(bodyWeight) || isNaN(concentration) || isNaN(exposure) || isNaN(ld50)) {
+        alert('Please fill in all fields correctly.');
+        return;
+    }
+
+    const data = chemicalData[chemical];
+    const qsarRisk = data.qsarRisk;
+
+    // Calculate risk level
+    const calculatedRisk = (concentration * exposure) / (bodyWeight * ld50);
+
+    // Update results
+    document.getElementById('qsar-risk').textContent = qsarRisk.toFixed(4);
+    document.getElementById('calculated-risk').textContent = calculatedRisk.toExponential(4);
+    document.getElementById('risk-classification').textContent = getRiskClassification(calculatedRisk);
+
+    // Update chemical details
+    document.getElementById('description').textContent = data.details.Description;
+    document.getElementById('diseases').textContent = data.details.Diseases;
+    document.getElementById('solution').textContent = data.details.Solution;
+
+    // Generate graph
+    generateGraph();
+});
+
+// Get risk classification
+function getRiskClassification(riskLevel) {
+    if (riskLevel > 0.1) return 'High';
+    if (riskLevel > 0.01) return 'Moderate';
+    return 'Low';
+}
+
+// Generate graph
+function generateGraph() {
+    const ctx = document.getElementById('risk-graph').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['QSAR Model', 'Experimental', 'Custom Formula'],
+            labels: ['QSAR Predicted', 'Calculated'],
             datasets: [{
-                label: 'Risk Level',
-                data: [data.qsar, data.experimental, data.custom],
-                backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe']
+                label: 'Risk Levels',
+                data: [
+                    parseFloat(document.getElementById('qsar-risk').textContent),
+                    parseFloat(document.getElementById('calculated-risk').textContent)
+                ],
+                backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+                borderWidth: 1
             }]
         },
         options: {
-            responsive: true,
             scales: {
                 y: {
                     beginAtZero: true
