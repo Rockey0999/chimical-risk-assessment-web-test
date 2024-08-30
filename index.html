@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemical Risk Assessment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1 class="animated-title">Chemical Risk Assessment for Individuals</h1>
+        <p>Mathematical Modeling and Computational Thinking</p>
+    </header>
+
+    <section class="chemical-info">
+        <h2>Select a Chemical</h2>
+        <select id="chemicalSelect" onchange="updateChemicalDetails()">
+            <option value="">--Select--</option>
+            <!-- Add options for each chemical -->
+        </select>
+
+        <div id="chemicalDetails">
+            <h3>Details:</h3>
+            <p id="chemicalDescription"></p>
+            <p id="chemicalRiskLevels"></p>
+        </div>
+    </section>
+
+    <section class="risk-comparison">
+        <h2>Risk Level Comparison</h2>
+        <canvas id="riskChart"></canvas>
+    </section>
+
+    <section class="graph-analysis">
+        <h2>Graphical Analysis</h2>
+        <canvas id="graphAnalysis"></canvas>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
